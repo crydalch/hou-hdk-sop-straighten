@@ -1,0 +1,43 @@
+#type: node
+#context: sop
+#internal: straighten
+#largeicon: /nodes/sop/SOP_Template.png
+
+#tags: shape
+
+= Straighten =
+
+""" Straighten specified set of eges """
+
+If you specify edge selection that contains not conected sets of edges, it will split it on edge islands and apply straighten to each, separately. 
+It will ignore each edge island that have more than 2 endpoints.
+
+@parameters
+
+== Filter ==
+
+Edge Group:
+    #channels: /edgegroupinput0
+    Set of eges that will be modified
+
+== Main ==
+	
+Power:
+    #channels: /straightenpower
+    Blends between original position and the straighten one
+
+Uniform Point Distribution:
+    #channels: /setuniformpointdistribution
+    Uniformly distributes points of selected edges, so their length was the same
+	
+== Additional ==
+
+[Include:hdktemplates--soptemplate#adddescription]
+[Include:hdktemplates--soptemplate#cleandescription]
+[Include:hdktemplates--soptemplate#descriptionmessage]
+
+== Debug ==
+
+Report Edge Islands:
+    #channels: /reportedgeislands
+    Print information about each detected edge island

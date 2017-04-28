@@ -1,9 +1,7 @@
 /*
-	Use this as a starting template for any SOP operator.
+	Tool that straightens selected edges.
 
 	IMPORTANT! ------------------------------------------
-	* External macros used:
-		GET_SOP_Namespace() - comes from "Macros_Namespace.h"
 	-----------------------------------------------------
 
 	Author: 	SNOWFLAKE
@@ -23,57 +21,58 @@
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#pragma once
+
+#ifndef ____parameters_h____
+#define ____parameters_h____
+
 /* -----------------------------------------------------------------
 INCLUDES                                                           |
 ----------------------------------------------------------------- */
 
-#include <UT/UT_DSOVersion.h>
-#include <OP/OP_OperatorTable.h>
+// hou-hdk-common
+#include <SOP/Macros_SwitcherPRM.h>
+#include <SOP/Macros_GroupMenuPRM.h>
+#include <SOP/Macros_FloatPRM.h>
+#include <SOP/Macros_TogglePRM.h>
 
-#include "SOP_Straighten_Operator.h"
+// this
+#include "SOP_Straighten.h"
 
 /* -----------------------------------------------------------------
 DEFINES                                                            |
 ----------------------------------------------------------------- */
 
-#define SOP_Operator		GET_SOP_Namespace()::SOP_Straighten_Operator
-#define SOP_SmallName		"modeling::straighten::1.0"
-#define SOP_BigName			"Straighten"
-#define SOP_TabMenuPath		"Modeling"
+#define SOP_Operator GET_SOP_Namespace()::SOP_Straighten
 
 /* -----------------------------------------------------------------
-REGISTRATION                                                       |
+PARAMETERS                                                         |
 ----------------------------------------------------------------- */
 
-void 
-newSopOperator(OP_OperatorTable* table)
-{
-	auto success = false;
-		
-	auto sop = new OP_Operator
-	(
-		SOP_SmallName,
-		SOP_BigName,
-		SOP_Operator::CreateOperator,
-		SOP_Operator::parametersList,
-		1, // min inputs 
-		1, // max inputs
-		0,
-		OP_FLAG_GENERATOR, // type of node
-		0,
-		1, // outputs count
-		SOP_TabMenuPath
-	);
+DECLARE_SOP_Namespace_Start()
 
-	success = table->addOperator(sop);	
-	//table->addOpHidden(sop->getName());	
-}
+	namespace UI
+	{
+		__DECLARE__Filter_Section_PRM(1)
+		DECLARE_Default_EdgeGroup_Input_0_PRM(input0)
+
+		__DECLARE_Main_Section_PRM(3)
+		DECLARE_Custom_Float_0R_to_1R_PRM("straightenpower", "Power", 1, "How much straighten apply.", straightenPower)						
+		DECLARE_Custom_Toggle_with_Separator_OFF_PRM("setuniformpointdistribution", "Uniform Point Distribution", "setuniformpointdistributionseparator", 0, "Uniformly distribute points to create even length edges.", uniformDistribution)
+
+		__DECLARE_Additional_Section_PRM(4)		
+		DECLARE_DescriptionPRM(SOP_Operator)
+
+		__DECLARE_Debug_Section_PRM(1)
+		DECLARE_Custom_Toggle_with_Separator_OFF_PRM("reportedgeislands", "Report Edge Islands", "reportedgeislandsseparator", 0, "Print information about each detected edge island.", reportEdgeIslands)
+	}
+
+DECLARE_SOP_Namespace_End
 
 /* -----------------------------------------------------------------
 UNDEFINES                                                          |
 ----------------------------------------------------------------- */
 
-#undef SOP_TabMenuPath
-#undef SOP_BigName
-#undef SOP_SmallName
 #undef SOP_Operator
+
+#endif // !____parameters_h____
