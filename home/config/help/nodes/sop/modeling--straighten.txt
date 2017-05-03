@@ -1,7 +1,7 @@
 #type: node
 #context: sop
 #internal: straighten
-#largeicon: /nodes/sop/SOP_Template.png
+#icon: /nodes/sop/SOP_Template.png
 
 #tags: shape
 
@@ -17,18 +17,18 @@ It will ignore each edge island that have more than 2 endpoints.
 == Filter ==
 
 Edge Group:
-    #channels: /edgegroupinput0
+    #id: edgegroupinput0
     Set of eges that will be modified
 
 == Main ==
 	
-Power:
-    #channels: /straightenpower
-    Blends between original position and the straighten one
+Morph:
+    #id: morphpower
+    Blend between original and modified position
 
 Uniform Point Distribution:
-    #channels: /setuniformpointdistribution
-    Uniformly distributes points of selected edges, so their length was the same
+    #id: setuniformpointdistribution
+    Uniformly distribute points to create even length edges
 	
 == Additional ==
 
@@ -38,6 +38,6 @@ Uniform Point Distribution:
 
 == Debug ==
 
-Report Edge Islands:
+Edge Islands:
     #channels: /reportedgeislands
     Print information about each detected edge island

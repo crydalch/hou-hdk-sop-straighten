@@ -31,7 +31,7 @@ INCLUDES                                                           |
 #include <BM/BM_ResourceManager.h>
 
 // hou-hdk-common
-#include <SOP/Macros_GroupMenuPRM.h>
+#include <Macros/GroupMenuPRM.h>
 
 // this
 #include "SOP_Straighten.h"
@@ -43,7 +43,7 @@ DEFINES                                                            |
 #define SOP_Operator		GET_SOP_Namespace()::SOP_Straighten
 #define SOP_SmallName		"modeling::straighten::1.0"
 #define SOP_BigName			"Straighten"
-#define SOP_TabMenuPath		"Modeling"
+#define SOP_TabMenuPath		"Toolkit/Modeling"
 
 #define MSS_Selector		GET_SOP_Namespace()::MSS_StraightenSelector
 #define MSS_SmallName		"modeling::straighten_selector::1.0"
