@@ -40,8 +40,8 @@ INCLUDES                                                           |
 #include <Macros/Namespace.h>
 #include <Macros/UpdateParmsFlags.h>
 
-#include <Containers/GA_EdgeTIsland.h>
 #include <Containers/GA_EdgeTData.h>
+#include <Containers/GA_EdgeTIsland.h>
 
 /* -----------------------------------------------------------------
 DEFINES                                                            |
@@ -55,7 +55,6 @@ FORWARDS                                                           |
 ----------------------------------------------------------------- */
 
 class UT_AutoInterrupt;
-class GA_EdgeIsland;
 
 /* -----------------------------------------------------------------
 OPERATOR DECLARATION                                               |
@@ -86,16 +85,10 @@ DECLARE_SOP_Namespace_Start()
 		
 		static int								CallbackSetMorph(void* data, int index, float time, const PRM_Template* tmp);
 
-	private:		
-		bool									ExtractDataFromEdges(GA_EdgeTData<GA_Edge>& edgedata, UT_AutoInterrupt progress);
-		bool									FindAllEdgeIslands(GA_EdgeTData<GA_Edge>& edgedata, UT_AutoInterrupt progress);
-		bool									FindEdgesRecurse(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress);
-		bool									WhenOneEdge(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress);
-		bool									WhenMoreThanOneEdge(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress);
-		OP_ERROR								StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time);
+	private:
+		OP_ERROR								StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_AutoInterrupt progress, fpreal time);
 
-		const GA_EdgeGroup*						_edgeGroupInput0;
-		std::vector<GA_EdgeTIsland<GA_Edge>>	_edgeIslands;
+		const GA_EdgeGroup*						_edgeGroupInput0;		
 	};
 
 DECLARE_SOP_Namespace_End

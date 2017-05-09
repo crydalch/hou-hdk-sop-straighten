@@ -38,6 +38,7 @@ INCLUDES                                                           |
 // hou-hdk-common
 #include <Macros/ParameterList.h>
 #include <Utility/ParameterAccessing.h>
+#include <Utility/EdgeGroupAccessing.h>
 
 // this
 #include "Parameters.h"
@@ -49,7 +50,7 @@ DEFINES                                                            |
 #define SOP_Operator			GET_SOP_Namespace()::SOP_Straighten
 #define SOP_SmallName			"modeling::straighten::1.0"
 #define SOP_Input_Name_0		"Geometry"
-#define SOP_Icon_Name			"SOP_Straighten.svg"
+#define SOP_Icon_Name			"nodeway_short_dark_WB.png"
 #define SOP_Base_Operator		SOP_Node
 #define MSS_Selector			GET_SOP_Namespace()::MSS_StraightenSelector
 
@@ -58,6 +59,7 @@ DEFINES                                                            |
 
 #define UI						GET_SOP_Namespace()::UI
 #define PRM_ACCESS				GET_Base_Namespace()::Utility::PRM
+#define GRP_ACCESS				GET_Base_Namespace()::Utility::Groups
 
 /* -----------------------------------------------------------------
 PARAMETERS                                                         |
@@ -144,168 +146,10 @@ SOP_Operator::CallbackSetMorph(void* data, int index, float time, const PRM_Temp
 	return 1;
 }
 
-bool 
-SOP_Operator::ExtractDataFromEdges(GA_EdgeTData<GA_Edge>& edgedata, UT_AutoInterrupt progress)
-{
-	edgedata.Clear();
-
-	// extract data from edges
-	for (auto edgeIt = this->_edgeGroupInput0->begin(); !edgeIt.atEnd(); ++edgeIt)
-	{
-		if (progress.wasInterrupted())
-		{
-			addError(SOP_ErrorCodes::SOP_MESSAGE, "Operation interrupted");
-			return false;
-		}
-		if (!edgeIt->isValid()) continue;
-		
-		edgedata.AddEdge(edgeIt->p0(), *edgeIt);
-		edgedata.AddEdge(edgeIt->p1(), *edgeIt);
-	}
-
-	// collect endpoints	
-	for (auto data : edgedata.GetExtractedData())
-	{
-		if (progress.wasInterrupted())
-		{
-			addError(SOP_ErrorCodes::SOP_MESSAGE, "Operation interrupted");
-			return false;
-		}
-		if (data.second.size() > 1) continue;
-
-		edgedata.AddEndPoint(data.first);		
-	}
-
-	return true;
-}
-
-bool 
-SOP_Operator::FindAllEdgeIslands(GA_EdgeTData<GA_Edge>& edgedata, UT_AutoInterrupt progress)
-{
-	// make sure nothing is cached
-	this->_edgeIslands.clear();
-	
-	// since we have endpoints,
-	// we can make our search faster by going only over them, 
-	// instead of looking thru all points of GA_EdgeTData::GetExtractedData()
-	for (auto point : edgedata.GetEndPoints())
-	{
-		if (progress.wasInterrupted())
-		{
-			addError(SOP_ErrorCodes::SOP_MESSAGE, "Operation interrupted");
-			return false;
-		}
-
-		// check if island was already discovered
-		bool canContinue = true;
-		for (auto island : this->_edgeIslands)
-		{
-			if (progress.wasInterrupted())
-			{
-				addError(SOP_ErrorCodes::SOP_MESSAGE, "Operation interrupted");
-				return false;
-			}
-
-			if (island.Contains(point))
-			{
-				canContinue = false;
-				break;
-			}
-		}
-		if (!canContinue) continue;
-
-		// we are looking only for islands that have endpoints
-		auto edgeIsland = GA_EdgeTIsland<GA_Edge>(EdgeIslandType::OPEN);
-
-		auto success = FindEdgesRecurse(edgedata, point, point, edgeIsland, progress);
-		if (!success) return false;
-
-		this->_edgeIslands.push_back(edgeIsland);
-	}
-
-	return true;
-}
-
-bool
-SOP_Operator::FindEdgesRecurse(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress)
-{
-	// how many edges?
-	auto edges = edgedata.GetExtractedData().at(nextoffset);
-	switch (edges.size())
-	{
-		case 0:
-			{
-				// this shouldn't ever happen, but who knows?! I don't :)
-				std::cout << "WTF?" << std::endl;
-			}
-			break;
-		case 1:
-			{ return WhenOneEdge(edgedata, startoffset, nextoffset, edgeisland, progress); }
-			break;
-		default:
-			{ return WhenMoreThanOneEdge(edgedata, startoffset, nextoffset, edgeisland, progress); }
-			break;
-	}
-
-	return true;
-}
-
-bool
-SOP_Operator::WhenOneEdge(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress)
-{
-	// store ourself
-	edgeisland.AddEndPoint(nextoffset);
-
-	// are we at start?
-	if (nextoffset == startoffset)
-	{
-		// grab edge...
-		auto edge = *edgedata.GetExtractedData().at(nextoffset).begin();
-		edgeisland.AddEdge(edge);
-
-		// ... and process next point
-		auto newNextOffset = edge.p0() == nextoffset ? edge.p1() : edge.p0();
-		return FindEdgesRecurse(edgedata, startoffset, newNextOffset, edgeisland, progress);
-	}
-
-	return true;
-}
-
-bool
-SOP_Operator::WhenMoreThanOneEdge(GA_EdgeTData<GA_Edge>& edgedata, const GA_Offset startoffset, const GA_Offset nextoffset, GA_EdgeTIsland<GA_Edge>& edgeisland, UT_AutoInterrupt progress)
-{
-	// store ourself
-	edgeisland.AddPoint(nextoffset);
-
-	// grab edges	
-	auto edges = edgedata.GetExtractedData().at(nextoffset);
-	for (auto edge : edges)
-	{
-		if (progress.wasInterrupted())
-		{
-			addError(SOP_ErrorCodes::SOP_MESSAGE, "Operation interrupted");
-			return false;
-		}
-
-		// find point that != nextoffset and is not stored in edgeisland
-		auto newNextOffset = edge.p0() == nextoffset ? edge.p1() : edge.p0();
-		if (edgeisland.Contains(newNextOffset)) continue;
-
-		// now we are sure that we didn't visited this branch, so we can add edge...
-		edgeisland.AddEdge(edge);
-
-		// ... and process next point
-		return FindEdgesRecurse(edgedata, startoffset, newNextOffset, edgeisland, progress);
-	}
-
-	return true;
-}
-
 OP_ERROR 
-SOP_Operator::StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time)
+SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_AutoInterrupt progress, fpreal time)
 {	
 	UT_Map<GA_Offset, UT_Vector3>	originalPositions;
-	UT_Vector3Array					positions;
 	UT_Map<GA_Offset, UT_Vector3>	edits;
 
 	bool	setMorphState;
@@ -320,7 +164,7 @@ SOP_Operator::StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time)
 	morphPowerState = setMorphState ? 0.01 * morphPowerState : 1.0;
 
 #define PROGRESS_ESCAPE(node, message, passedprogress) if (passedprogress.wasInterrupted()) { node->addError(SOP_ErrorCodes::SOP_MESSAGE, message); return error(); }	
-	for (auto island : this->_edgeIslands)
+	for (auto island : edgeislands)
 	{
 		PROGRESS_ESCAPE(this, "Operation interrupted", progress)
 					
@@ -339,28 +183,21 @@ SOP_Operator::StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time)
 		if (island.GetEdges().size() <= 1) continue;
 		
 		// store original positions		
-		for (auto point : island.GetPoints())
+		auto it = island.Begin();
+		for (it; !it.atEnd(); it.advance())
 		{
 			PROGRESS_ESCAPE(this, "Operation interrupted", progress)
-			originalPositions[point] = this->gdp->getPos3(point);
+			originalPositions[*it] = this->gdp->getPos3(*it);
 		}
 
-		// get each endpoint position	
-		positions.clear();
-
-		for (auto offset : island.GetEndPoints())
-		{
-			PROGRESS_ESCAPE(this, "Operation interrupted", progress)
-			positions.append(gdp->getPos3(offset));
-		}
+		// calculate direction
+		auto direction = this->gdp->getPos3(island.Last()) - this->gdp->getPos3(island.First());
+		direction.normalize();
 		
-		// calculate projection
-		const UT_Vector3 projection = positions[0] - positions[1];
-
 		// straighten edges
 		edits.clear();
 
-		GUstraightenEdges(edits, *gdp, island.GetEdges(), &projection);
+		GUstraightenEdges(edits, *gdp, island.GetEdges(), &direction);
 		for (auto edit : edits)
 		{
 			PROGRESS_ESCAPE(this, "Operation interrupted", progress)			 
@@ -369,7 +206,9 @@ SOP_Operator::StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time)
 
 		// uniform distribution
 		if (setUniformDistributionState)
-		{
+		{		
+			// if anyone wonders why I didn't used GUevenlySpaceEdges to do this, my algorithm works better, SESI version fails in some situations			
+			/*
 			edits.clear();		
 		
 			GUevenlySpaceEdges(edits, *gdp, island.GetEdges());
@@ -377,16 +216,41 @@ SOP_Operator::StraightenEachEdgeIsland(UT_AutoInterrupt progress, fpreal time)
 			{
 				PROGRESS_ESCAPE(this, "Operation interrupted", progress)			
 				this->gdp->setPos3(edit.first, edit.second);
-			}	
+			}*/							
+
+			auto distance = (this->gdp->getPos3(island.Last()) - this->gdp->getPos3(island.First())).length() / (island.Entries() - 1);
+
+			UT_Vector3 currentPosition;					
+			exint multiplier = 0;
+
+			it = island.Begin();
+			for (it; !it.atEnd(); it.advance())
+			{
+				if (multiplier == 0)
+				{
+					currentPosition = this->gdp->getPos3(*it);
+					multiplier++;
+				}
+
+				// skip first and last point
+				if (*it == island.First() || *it == island.Last()) continue;
+
+				auto newPosition = currentPosition + (direction * (distance * multiplier));
+				this->gdp->setPos3(*it, newPosition);
+
+				multiplier++;
+			}
 		}
 
 		// morph
 		if (!setMorphState) continue;
-		for (auto offset : island.GetPoints())
+
+		it = island.Begin();
+		for (it; !it.atEnd(); it.advance())
 		{
 			PROGRESS_ESCAPE(this, "Operation interrupted", progress)
-			auto newPos = SYSlerp(originalPositions[offset], this->gdp->getPos3(offset), morphPowerState);
-			this->gdp->setPos3(offset, newPos);
+			auto newPos = SYSlerp(originalPositions[*it], this->gdp->getPos3(*it), morphPowerState);
+			this->gdp->setPos3(*it, newPos);
 		}
 	}
 #undef PROGRESS_ESCAPE
@@ -409,21 +273,27 @@ SOP_Operator::cookMySop(OP_Context &context)
 		auto success = this->_edgeGroupInput0 && !this->_edgeGroupInput0->isEmpty();
 		if ((success && error() >= OP_ERROR::UT_ERROR_WARNING) || (!success && error() >= OP_ERROR::UT_ERROR_NONE))
 		{
-			addWarning(SOP_ERR_BADGROUP);
+			clearSelection();
+			addWarning(SOP_ErrorCodes::SOP_ERR_BADGROUP);
 			return error();
 		}		
 
-		// edge selection can contain multiple separate edge island, so before we find them, we need to find their endpoints, so we could have some starting point
-		auto edgeData = GA_EdgeTData<GA_Edge>();
-		success = ExtractDataFromEdges(edgeData, progress);
+		// edge selection can contain multiple separate edge island, so before we find them, we need to find their endpoints, so we could have some starting point		
+		auto edgeData = GA_EdgesData();
+		edgeData.Clear();
+
+		success = GRP_ACCESS::Edge::Break::PerPoint(this, this->_edgeGroupInput0, edgeData, progress);		
 		if ((success && error() >= OP_ERROR::UT_ERROR_WARNING) || (!success && error() >= OP_ERROR::UT_ERROR_NONE)) return error();		
 
-		// once we have endpoints, we can go thru our edge group and split it on edge islands		
-		success = FindAllEdgeIslands(edgeData, progress);
+		// once we have endpoints, we can go thru our edge group and split it on edge islands
+		auto edgeIslands = GA_EdgeIslandBundle();
+		edgeIslands.clear();
+
+		success = GRP_ACCESS::Edge::Break::PerIsland(this, edgeData, edgeIslands, EdgeIslandType::OPEN, progress);
 		if ((success && error() >= OP_ERROR::UT_ERROR_WARNING) || (!success && error() >= OP_ERROR::UT_ERROR_NONE)) return error();
 
 		// finally, we can go thru each edge island and calculate and apply straighten
-		return StraightenEachEdgeIsland(progress, currentTime);
+		return StraightenEachEdgeIsland(edgeIslands, progress, currentTime);
 	}
 
 	return error();

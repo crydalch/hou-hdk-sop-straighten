@@ -57,10 +57,10 @@ DECLARE_SOP_Namespace_Start()
 		DECLARE_Default_EdgeGroup_Input_0_PRM(input0)
 
 		__DECLARE_Main_Section_PRM(2)		
-		DECLARE_Custom_Toggle_with_Separator_OFF_PRM("setuniformpointdistribution", "Uniform Point Distribution", "setuniformpointdistributionseparator", 0, "Uniformly distribute points to create even length edges.", uniformDistribution)
+		DECLARE_Toggle_with_Separator_OFF_PRM("setuniformpointdistribution", "Uniform Point Distribution", "setuniformpointdistributionseparator", 0, "Uniformly distribute points to create even length edges.", uniformDistribution)
 
 		__DECLARE_Additional_Section_PRM(7)		
-		DECLARE_Custom_Toggle_with_Separator_OFF_PRM("setmorph", "Morph", "setmorphseparator", &SOP_Operator::CallbackSetMorph, "Blend between original and modified position.", setMorph)
+		DECLARE_Toggle_with_Separator_OFF_PRM("setmorph", "Morph", "setmorphseparator", &SOP_Operator::CallbackSetMorph, "Blend between original and modified position.", setMorph)
 		DECLARE_Custom_Float_MinR_to_MaxU_PRM("morphpower", "Power", 0, 100, 100, 0, "Specify morph amount.", morphPower)
 		
 		DECLARE_DescriptionPRM(SOP_Operator)
