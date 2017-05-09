@@ -1,7 +1,7 @@
 #type: node
 #context: sop
 #internal: straighten
-#icon: /nodes/sop/SOP_Template.png
+#icon: /nodes/sop/nodeway_short_dark_WB.png
 
 #tags: shape
 
@@ -9,35 +9,36 @@
 
 """ Straighten specified set of eges """
 
-If you specify edge selection that contains not conected sets of edges, it will split it on edge islands and apply straighten to each, separately. 
-It will ignore each edge island that have more than 2 endpoints.
+If you specify edge selection that contains not connected sets of edges, it will split it on edge islands and apply straighten to each, separately. 
+It will ignore each edge island that have more than 2 endpoints or is closed.
+
+Examples:
+
+- example of selection with two endpoints
+
+[Image:./straighten-selection-1.gif]
+
+- example of selection that contains also not supported selection types
+
+[Image:./straighten-selection-2.gif]
 
 @parameters
 
 == Filter ==
 
-Edge Group:
-    #id: edgegroupinput0
-    Set of eges that will be modified
+[Include:parameters--group#edgegroupinput0]
 
 == Main ==
-	
-Morph:
-    #id: morphpower
-    Blend between original and modified position
 
 Uniform Point Distribution:
     #id: setuniformpointdistribution
-    Uniformly distribute points to create even length edges
+    Uniformly distribute points to create even length edges.
 	
 == Additional ==
 
-[Include:hdktemplates--soptemplate#adddescription]
-[Include:hdktemplates--soptemplate#cleandescription]
-[Include:hdktemplates--soptemplate#descriptionmessage]
+[Include:parameters--morph#setmorph]
+[Include:parameters--morph#morphvalue]
 
-== Debug ==
-
-Edge Islands:
-    #channels: /reportedgeislands
-    Print information about each detected edge island
+[Include:parameters--description#adddescription]
+[Include:parameters--description#cleandescription]
+[Include:parameters--description#descriptionmessage]
