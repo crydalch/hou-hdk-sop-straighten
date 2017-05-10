@@ -1,6 +1,6 @@
 # SOP Straighten HDK implementation. #
 
-Overview (video)](https://www.youtube.com/watch?v=QWF2qvlgGhY&list=PLWInthQ-GtLhzoyqhaJAvzico8mkXMyDI&index=2) on YouTube.
+Overview [video(https://www.youtube.com/watch?v=QWF2qvlgGhY&list=PLWInthQ-GtLhzoyqhaJAvzico8mkXMyDI&index=2) on YouTube.
 
 **IMPORTANT:**
 * Requires [hou-hdk-common](https://github.com/sebastianswann/hou-hdk-common) repository
