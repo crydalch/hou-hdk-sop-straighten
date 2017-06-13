@@ -73,22 +73,22 @@ DECLARE_SOP_Namespace_Start()
 		static PRM_Template _switchActiveState[];
 
 	protected:
-		virtual ~SOP_Straighten() override;
+		~SOP_Straighten() override;
 		SOP_Straighten(OP_Network* network, const char* name, OP_Operator* op);
 		
-		const char*								inputLabel(unsigned input) const override;
+		const char*							inputLabel(unsigned input) const override;
 
 	public:		
-		static OP_Node*							CreateMe(OP_Network* network, const char* name, OP_Operator* op);
-		virtual OP_ERROR						cookInputGroups(OP_Context& context, int alone = 0);
-		static PRM_Template						parametersList[];
+		static OP_Node*						CreateMe(OP_Network* network, const char* name, OP_Operator* op);
+		OP_ERROR							cookInputGroups(OP_Context& context, int alone = 0) override;
+		static PRM_Template					parametersList[];
 		
-		static int								CallbackSetMorph(void* data, int index, float time, const PRM_Template* tmp);
+		static int							CallbackSetMorph(void* data, int index, float time, const PRM_Template* tmp);
 
 	private:
-		OP_ERROR								StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_AutoInterrupt progress, fpreal time);
+		OP_ERROR							StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_AutoInterrupt progress, fpreal time);
 
-		const GA_EdgeGroup*						_edgeGroupInput0;		
+		const GA_EdgeGroup*					_edgeGroupInput0;		
 	};
 
 DECLARE_SOP_Namespace_End

@@ -89,7 +89,7 @@ SOP_Operator::updateParmsFlags()
 	DEFAULTS_UpdateParmsFlags(SOP_Base_Operator)
 
 	// is input connected?
-	exint is0Connected = getInput(0) == NULL ? 0 : 1;
+	exint is0Connected = getInput(0) == nullptr ? 0 : 1;
 
 	/* ---------------------------- Set Global Visibility ---------------------------- */
 	
@@ -114,7 +114,9 @@ OPERATOR INITIALIZATION                                            |
 
 SOP_Operator::~SOP_Straighten() { }
 
-SOP_Operator::SOP_Straighten(OP_Network* network, const char* name, OP_Operator* op) : SOP_Base_Operator(network, name, op), _edgeGroupInput0(NULL)
+SOP_Operator::SOP_Straighten(OP_Network* network, const char* name, OP_Operator* op) 
+: SOP_Base_Operator(network, name, op), 
+_edgeGroupInput0(nullptr)
 { op->setIconName(SOP_Icon_Name); }
 
 OP_Node* 
@@ -311,7 +313,7 @@ MSS_Selector::MSS_StraightenSelector(OP3D_View& viewer, PI_SelectorTemplate& tem
 
 BM_InputSelector* 
 MSS_Selector::CreateMe(BM_View& viewer, PI_SelectorTemplate& templ) 
-{ return new MSS_Selector((OP3D_View&)viewer, templ); }
+{ return new MSS_Selector(reinterpret_cast<OP3D_View&>(viewer), templ); }
 
 const char* 
 MSS_Selector::className() const 
