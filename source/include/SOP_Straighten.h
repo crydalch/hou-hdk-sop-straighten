@@ -74,8 +74,7 @@ DECLARE_SOP_Namespace_Start()
 
 	protected:
 		~SOP_Straighten() override;
-		SOP_Straighten(OP_Network* network, const char* name, OP_Operator* op);
-		
+		SOP_Straighten(OP_Network* network, const char* name, OP_Operator* op);		
 		const char*							inputLabel(unsigned input) const override;
 
 	public:		
@@ -106,7 +105,7 @@ DECLARE_SOP_Namespace_Start()
 		MSS_StraightenSelector(OP3D_View& viewer, PI_SelectorTemplate& templ);
 
 		static BM_InputSelector*			CreateMe(BM_View& Viewer, PI_SelectorTemplate& templ);
-		virtual const char*					className() const;
+		const char*							className() const override;
 	};
 
 DECLARE_SOP_Namespace_End
