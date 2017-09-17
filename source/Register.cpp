@@ -41,7 +41,7 @@ DEFINES                                                            |
 ----------------------------------------------------------------- */
 
 #define SOP_Operator		GET_SOP_Namespace()::SOP_Straighten
-#define SOP_SmallName		"modeling::straighten::1.0"
+#define SOP_SmallName		"modeling::straighten::1.1"
 #define SOP_BigName			"Straighten"
 #define SOP_TabMenuPath		"Toolkit/Modeling"
 

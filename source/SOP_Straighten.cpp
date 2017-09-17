@@ -155,16 +155,18 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 	UT_Map<GA_Offset, UT_Vector3>	originalPositions;
 	UT_Map<GA_Offset, UT_Vector3>	edits;
 
-	bool	setMorphState;
-	fpreal	morphPowerState;
-	bool	setUniformDistributionState;
+	bool							setMorphState;
+	fpreal							morphPowerState;
+	bool							setUniformDistributionState;
+	exint							edgeIslandErrorLevelState;
 
 	PRM_ACCESS::Get::IntPRM(this, setUniformDistributionState, UI::uniformDistributionToggle_Parameter, time);
-	PRM_ACCESS::Get::IntPRM(this, setMorphState, UI::setMorphToggle_Parameter, time);
-	PRM_ACCESS::Get::FloatPRM(this, morphPowerState, UI::morphPowerFloat_Parameter, time);
 
-	// convert from percentage
-	morphPowerState = setMorphState ? 0.01 * morphPowerState : 1.0;
+	PRM_ACCESS::Get::IntPRM(this, setMorphState, UI::setMorphToggle_Parameter, time);
+	PRM_ACCESS::Get::FloatPRM(this, morphPowerState, UI::morphPowerFloat_Parameter, time);	
+	morphPowerState = setMorphState ? 0.01 * morphPowerState : 1.0; // convert from percentage
+	
+	PRM_ACCESS::Get::IntPRM(this, edgeIslandErrorLevelState, UI::edgeIslandErrorModeChoiceMenu_Parameter, time);
 
 #define PROGRESS_ESCAPE(node, message, passedprogress) if (passedprogress.wasInterrupted()) { node->addError(SOP_ErrorCodes::SOP_MESSAGE, message); return error(); }	
 	for (auto island : edgeislands)
@@ -178,8 +180,6 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 		// ignore not correct ones
 		if (!island.IsValid())
 		{
-			exint edgeIslandErrorLevelState;
-			PRM_ACCESS::Get::IntPRM(this, edgeIslandErrorLevelState, UI::edgeIslandErrorModeChoiceMenu_Parameter, time);
 			switch (edgeIslandErrorLevelState)
 			{
 				default: /* do nothing */ continue;
