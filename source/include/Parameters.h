@@ -36,6 +36,7 @@ INCLUDES                                                           |
 #include <Macros/FloatPRM.h>
 #include <Macros/TogglePRM.h>
 #include <Macros/ErrorLevelMenuPRM.h>
+#include <Macros/SeparatorPRM.h>
 
 // this
 #include "SOP_Straighten.h"
@@ -54,12 +55,13 @@ DECLARE_SOP_Namespace_Start()
 
 	namespace UI
 	{
-		__DECLARE__Filter_Section_PRM(2)
-		DECLARE_Default_EdgeGroup_Input_0_PRM(input0)
+		__DECLARE__Filter_Section_PRM(3)
+		DECLARE_Default_EdgeGroup_Input_0_PRM(input0)		
+		DECLARE_Custom_Separator_PRM("filtererrorsseparator", filterErrors)
 		DECLARE_ErroLevelMenu_PRM("edgeislanderrormode", "Edge Island Error Mode", 1, "Specify edge island node error mode.", edgeIsland)
 
 		__DECLARE_Main_Section_PRM(2)		
-		DECLARE_Toggle_with_Separator_OFF_PRM("setuniformpointdistribution", "Uniform Point Distribution", "setuniformpointdistributionseparator", 0, "Uniformly distribute points to create even length edges.", uniformDistribution)
+		DECLARE_Toggle_with_Separator_OFF_PRM("setuniformpointdistribution", "Uniform Point Distribution", "setuniformpointdistributionseparator", 0, "Uniformly distribute points to create even length edges.", uniformDistribution)		
 
 		__DECLARE_Additional_Section_PRM(7)		
 		DECLARE_Toggle_with_Separator_OFF_PRM("setmorph", "Morph", "setmorphseparator", &SOP_Operator::CallbackSetMorph, "Blend between original and modified position.", setMorph)

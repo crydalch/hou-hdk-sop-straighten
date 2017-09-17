@@ -68,12 +68,13 @@ PARAMETERS                                                         |
 PARAMETERLIST_Start(SOP_Operator)
 
 	UI::filterSectionSwitcher_Parameter,
-	UI::input0EdgeGroup_Parameter,
+	UI::input0EdgeGroup_Parameter,	
+	UI::filterErrorsSeparator_Parameter,
 	UI::edgeIslandErrorModeChoiceMenu_Parameter,
 
 	UI::mainSectionSwitcher_Parameter,	
 	UI::uniformDistributionToggle_Parameter,
-	UI::uniformDistributionSeparator_Parameter,
+	UI::uniformDistributionSeparator_Parameter,	
 
 	UI::additionalSectionSwitcher_Parameter,
 	UI::setMorphToggle_Parameter,
