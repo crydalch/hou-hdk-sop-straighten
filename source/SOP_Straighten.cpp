@@ -69,6 +69,7 @@ PARAMETERLIST_Start(SOP_Operator)
 
 	UI::filterSectionSwitcher_Parameter,
 	UI::input0EdgeGroup_Parameter,
+	UI::edgeIslandErrorModeChoiceMenu_Parameter,
 
 	UI::mainSectionSwitcher_Parameter,	
 	UI::uniformDistributionToggle_Parameter,
@@ -177,8 +178,14 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 		// ignore not correct ones
 		if (!island.IsValid())
 		{
-			addWarning(SOP_ErrorCodes::SOP_MESSAGE, "Edge islands with more than 2 endpoints detected.");
-			continue;
+			exint edgeIslandErrorLevelState;
+			PRM_ACCESS::Get::IntPRM(this, edgeIslandErrorLevelState, UI::edgeIslandErrorModeChoiceMenu_Parameter, time);
+			switch (edgeIslandErrorLevelState)
+			{
+				default: /* do nothing */ continue;
+				case static_cast<exint>(HOU_NODE_ERROR_LEVEL::Warning) : { addWarning(SOP_ErrorCodes::SOP_MESSAGE, "Edge islands with more than 2 endpoints detected."); } continue;
+				case static_cast<exint>(HOU_NODE_ERROR_LEVEL::Error) : { addError(SOP_ErrorCodes::SOP_MESSAGE, "Edge islands with more than 2 endpoints detected."); } return error();				
+			}
 		}
 
 		// ignore single edge ones
@@ -200,7 +207,7 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 		edits.clear();
 
 		GUstraightenEdges(edits, *gdp, island.GetEdges(), &direction);
-		for (auto edit : edits)
+		for (const auto edit : edits)
 		{
 			PROGRESS_ESCAPE(this, "Operation interrupted", progress)			 
 			this->gdp->setPos3(edit.first, edit.second);
@@ -218,9 +225,9 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 			{
 				PROGRESS_ESCAPE(this, "Operation interrupted", progress)			
 				this->gdp->setPos3(edit.first, edit.second);
-			}*/							
+			}*/
 
-			auto distance = (this->gdp->getPos3(island.Last()) - this->gdp->getPos3(island.First())).length() / (island.Entries() - 1);
+			const auto distance = (this->gdp->getPos3(island.Last()) - this->gdp->getPos3(island.First())).length() / (island.Entries() - 1);
 
 			UT_Vector3 currentPosition;					
 			exint multiplier = 0;
@@ -237,7 +244,7 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 				// skip first and last point
 				if (*it == island.First() || *it == island.Last()) continue;
 
-				auto newPosition = currentPosition + (direction * (distance * multiplier));
+				const auto newPosition = currentPosition + (direction * (distance * multiplier));
 				this->gdp->setPos3(*it, newPosition);
 
 				multiplier++;
@@ -251,7 +258,7 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 		for (it; !it.atEnd(); it.advance())
 		{
 			PROGRESS_ESCAPE(this, "Operation interrupted", progress)
-			auto newPos = SYSlerp(originalPositions[*it], this->gdp->getPos3(*it), morphPowerState);
+			const auto newPos = SYSlerp(originalPositions[*it], this->gdp->getPos3(*it), morphPowerState);
 			this->gdp->setPos3(*it, newPos);
 		}
 	}
@@ -263,6 +270,7 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 /* -----------------------------------------------------------------
 MAIN                                                               |
 ----------------------------------------------------------------- */
+#include <Enums/NodeErrorLevel.h>
 
 OP_ERROR 
 SOP_Operator::cookMySop(OP_Context &context)
@@ -308,7 +316,7 @@ SELECTOR IMPLEMENTATION                                            |
 MSS_Selector::~MSS_StraightenSelector() { }
 
 MSS_Selector::MSS_StraightenSelector(OP3D_View& viewer, PI_SelectorTemplate& templ) 
-: MSS_ReusableSelector(viewer, templ, SOP_SmallName, CONST_EdgeGroupInput0_Name, 0, true) 
+: MSS_ReusableSelector(viewer, templ, SOP_SmallName, CONST_EdgeGroupInput0_Name, nullptr, true) 
 { this->setAllowUseExistingSelection(false); }
 
 BM_InputSelector* 
