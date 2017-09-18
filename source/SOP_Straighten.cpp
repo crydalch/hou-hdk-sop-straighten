@@ -39,6 +39,7 @@ INCLUDES                                                           |
 #include <Macros/ParameterList.h>
 #include <Utility/ParameterAccessing.h>
 #include <Utility/EdgeGroupAccessing.h>
+#include <Enums/NodeErrorLevel.h>
 
 // this
 #include "Parameters.h"
@@ -70,7 +71,8 @@ PARAMETERLIST_Start(SOP_Operator)
 	UI::filterSectionSwitcher_Parameter,
 	UI::input0EdgeGroup_Parameter,	
 	UI::filterErrorsSeparator_Parameter,
-	UI::edgeIslandErrorModeChoiceMenu_Parameter,
+	UI::groupNotSpecifiedErrorModeChoiceMenu_Parameter,
+	UI::improperEdgeIslandErrorModeChoiceMenu_Parameter,
 
 	UI::mainSectionSwitcher_Parameter,	
 	UI::uniformDistributionToggle_Parameter,
@@ -167,7 +169,7 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 	PRM_ACCESS::Get::FloatPRM(this, morphPowerState, UI::morphPowerFloat_Parameter, time);	
 	morphPowerState = setMorphState ? 0.01 * morphPowerState : 1.0; // convert from percentage
 	
-	PRM_ACCESS::Get::IntPRM(this, edgeIslandErrorLevelState, UI::edgeIslandErrorModeChoiceMenu_Parameter, time);
+	PRM_ACCESS::Get::IntPRM(this, edgeIslandErrorLevelState, UI::improperEdgeIslandErrorModeChoiceMenu_Parameter, time);
 
 #define PROGRESS_ESCAPE(node, message, passedprogress) if (passedprogress.wasInterrupted()) { node->addError(SOP_ErrorCodes::SOP_MESSAGE, message); return error(); }	
 	for (auto island : edgeislands)
@@ -271,7 +273,6 @@ SOP_Operator::StraightenEachEdgeIsland(GA_EdgeIslandBundle& edgeislands, UT_Auto
 /* -----------------------------------------------------------------
 MAIN                                                               |
 ----------------------------------------------------------------- */
-#include <Enums/NodeErrorLevel.h>
 
 OP_ERROR 
 SOP_Operator::cookMySop(OP_Context &context)
@@ -285,7 +286,16 @@ SOP_Operator::cookMySop(OP_Context &context)
 		if ((success && error() >= OP_ERROR::UT_ERROR_WARNING) || (!success && error() >= OP_ERROR::UT_ERROR_NONE))
 		{
 			clearSelection();
-			addWarning(SOP_ErrorCodes::SOP_ERR_BADGROUP);
+
+			exint groupNotSpecifiedState;
+			PRM_ACCESS::Get::IntPRM(this, groupNotSpecifiedState, UI::groupNotSpecifiedErrorModeChoiceMenu_Parameter, currentTime);
+			switch (groupNotSpecifiedState)
+			{
+				default: /* do nothing */ break;
+				case static_cast<exint>(HOU_NODE_ERROR_LEVEL::Warning) : { addWarning(SOP_ErrorCodes::SOP_ERR_BADGROUP); } break;
+				case static_cast<exint>(HOU_NODE_ERROR_LEVEL::Error) : { addError(SOP_ErrorCodes::SOP_ERR_BADGROUP); } break;
+			}
+			
 			return error();
 		}		
 
