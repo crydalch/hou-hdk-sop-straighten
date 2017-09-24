@@ -279,7 +279,7 @@ SOP_Operator::cookMySop(OP_Context &context)
 {
 	DEFAULTS_CookMySop()
 		
-	if (duplicateSource(0, context) < OP_ERROR::UT_ERROR_WARNING && error() < OP_ERROR::UT_ERROR_WARNING && cookInputGroups(context) < OP_ERROR::UT_ERROR_WARNING)
+	if (duplicatePointSource(0, context) < OP_ERROR::UT_ERROR_WARNING && error() < OP_ERROR::UT_ERROR_WARNING && cookInputGroups(context) < OP_ERROR::UT_ERROR_WARNING)
 	{						
 		// group cooking could pass, but we need to be sure that we have any groups specified at all
 		auto success = this->_edgeGroupInput0 && !this->_edgeGroupInput0->isEmpty();
