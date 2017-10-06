@@ -10,8 +10,8 @@ Overview [video](https://www.youtube.com/watch?v=QWF2qvlgGhY&list=PLWInthQ-GtLhz
 
 **Currently supported platforms:**
 - [x] Windows
-- [ ] Apple
-- [ ] Linux
+- [x] Apple
+- [x] Linux
 
 **TODO:**
 - [ ] add multithreading (but only if I will be reaaalllyyy bored)
