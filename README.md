@@ -1,1 +1,1 @@
-Read [repository page](https://sebastianswann.github.io/hou-hdk-sop-straighten/) for more information.
+Check [repository page](https://sebastianswann.github.io/hou-hdk-sop-straighten/) for more information.
