@@ -1,6 +1,6 @@
 # SOP Straighten HDK implementation. #
 
-![Example](/home/config/help/nodes/sop/straighten-selection-1.gif)
+![Example](/images/straighten-selection-1.gif)
 
 Overview [video](https://www.youtube.com/watch?v=QWF2qvlgGhY&list=PLWInthQ-GtLhzoyqhaJAvzico8mkXMyDI&index=2) on YouTube.
 
