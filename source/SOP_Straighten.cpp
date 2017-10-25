@@ -57,7 +57,7 @@ DEFINES                                                            |
 #define SOP_Operator			GET_SOP_Namespace()::SOP_Straighten
 #define SOP_SmallName			"modeling::straighten::1.0"
 #define SOP_Input_Name_0		"Geometry"
-#define SOP_Icon_Name			"nodeway_short_dark_WB.png"
+#define SOP_Icon_Name			"straighten"
 #define SOP_Base_Operator		SOP_Node
 #define MSS_Selector			GET_SOP_Namespace()::MSS_StraightenSelector
 
